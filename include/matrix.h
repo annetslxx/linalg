@@ -13,7 +13,7 @@ namespace linalg {
 class Matrix {
 
 private:
-  double* m_ptr;
+  double *m_ptr;
   std::size_t m_rows;
   std::size_t m_columns;
   std::size_t m_capacity;
@@ -25,19 +25,19 @@ public:
   explicit Matrix(std::size_t rows);
   explicit Matrix(std::size_t rows, std::size_t columns);
 
-  Matrix(const Matrix& other);
-  Matrix(Matrix&& other);
+  Matrix(const Matrix &other);
+  Matrix(Matrix &&other);
 
   Matrix(std::initializer_list<std::initializer_list<double>> list);
   Matrix(std::initializer_list<double> list);
 
   ~Matrix() { delete[] this->m_ptr; }
 
-  Matrix& operator=(const Matrix& other);
-  Matrix& operator=(Matrix&& other);
+  Matrix &operator=(const Matrix &other);
+  Matrix &operator=(Matrix &&other);
 
-  double& operator()(std::size_t row, std::size_t col);
-  const double& operator()(std::size_t row, std::size_t col) const;
+  double &operator()(std::size_t row, std::size_t col);
+  const double &operator()(std::size_t row, std::size_t col) const;
 
   Matrix operator+() const;
   Matrix operator+(const Matrix &other) const;
@@ -64,21 +64,22 @@ public:
   std::size_t capacity() const { return this->m_capacity; }
   std::size_t size() const { return this->m_rows * this->m_columns; }
 
-  double* begin() { return this->m_ptr; }
-  double* end() { return this->m_ptr + this->size(); }
-  const double* begin() const { return this->m_ptr; }
-  const double* end() const { return this->m_ptr + this->size(); }
+  double *begin() { return this->m_ptr; }
+  double *end() { return this->m_ptr + this->size(); }
+  const double *begin() const { return this->m_ptr; }
+  const double *end() const { return this->m_ptr + this->size(); }
 
   void reshape(std::size_t rows, std::size_t columns);
   void reserve(std::size_t number);
   void clear();
   void shrink_to_fit();
 
-  void swap(Matrix& destination);
+  void swap(Matrix &destination);
 };
 
-inline void swap(Matrix& left_matrix, Matrix& right_matrix) {
-  left_matrix.swap(right_matrix); }
+inline void swap(Matrix &left_matrix, Matrix &right_matrix) {
+  left_matrix.swap(right_matrix);
+}
 } // namespace linalg
 
 #endif // LINALG_MATRIX_H
