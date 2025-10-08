@@ -39,6 +39,24 @@ public:
   double& operator()(std::size_t row, std::size_t col);
   const double& operator()(std::size_t row, std::size_t col) const;
 
+  Matrix operator+() const;
+  Matrix operator+(const Matrix &other) const;
+  Matrix &operator+=(const Matrix &other);
+
+  Matrix operator-() const;
+  Matrix operator-(const Matrix &other) const;
+  Matrix &operator-=(const Matrix &other);
+
+  Matrix operator*(const Matrix &other) const;
+  Matrix operator*(double value) const;
+  Matrix &operator*=(const Matrix &other);
+  Matrix &operator*=(double value);
+
+  bool operator==(const Matrix &other) const;
+  bool operator!=(const Matrix &other) const;
+
+  friend Matrix operator*(double value, const Matrix &matrix);
+
   bool empty() const { return this->m_rows == 0 || this->m_columns == 0; }
 
   std::size_t rows() const { return this->m_rows; }
