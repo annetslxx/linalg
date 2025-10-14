@@ -40,22 +40,12 @@ public:
   const double &operator()(std::size_t row, std::size_t col) const;
 
   Matrix operator+() const;
-  Matrix operator+(const Matrix &other) const;
-  Matrix &operator+=(const Matrix &other);
-
   Matrix operator-() const;
-  Matrix operator-(const Matrix &other) const;
-  Matrix &operator-=(const Matrix &other);
 
-  Matrix operator*(const Matrix &other) const;
-  Matrix operator*(double value) const;
+  Matrix &operator+=(const Matrix &other);
+  Matrix &operator-=(const Matrix &other);
   Matrix &operator*=(const Matrix &other);
   Matrix &operator*=(double value);
-
-  bool operator==(const Matrix &other) const;
-  bool operator!=(const Matrix &other) const;
-
-  friend Matrix operator*(double value, const Matrix &matrix);
 
   bool empty() const { return this->m_rows == 0 || this->m_columns == 0; }
 
@@ -73,13 +63,30 @@ public:
   void reserve(std::size_t number);
   void clear();
   void shrink_to_fit();
-
   void swap(Matrix &destination);
+
+  friend Matrix operator+(const Matrix &left, const Matrix &right);
+  friend Matrix operator-(const Matrix &left, const Matrix &right);
+  friend Matrix operator*(const Matrix &left, const Matrix &right);
+  friend Matrix operator*(const Matrix &left, double value);
+  friend Matrix operator*(double value, const Matrix &right);
+
+  friend Matrix operator==(const Matrix &left, const Matrix &right);
+  friend Matrix operator!=(const Matrix &left, const Matrix &right);
 };
 
 inline void swap(Matrix &left_matrix, Matrix &right_matrix) {
   left_matrix.swap(right_matrix);
 }
+
+Matrix operator+(const Matrix &left, const Matrix &right);
+Matrix operator-(const Matrix &left, const Matrix &right);
+Matrix operator*(const Matrix &left, const Matrix &right);
+Matrix operator*(const Matrix &left, double value);
+Matrix operator*(double value, const Matrix &right);
+
+Matrix operator==(const Matrix &left, const Matrix &right);
+Matrix operator!=(const Matrix &left, const Matrix &right);
 } // namespace linalg
 
 #endif // LINALG_MATRIX_H
