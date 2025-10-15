@@ -7,16 +7,18 @@
 #include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
+#include <algorithm>
 
 namespace linalg {
 
 class Matrix {
 
 private:
-  double *m_ptr;
+
   std::size_t m_rows;
   std::size_t m_columns;
   std::size_t m_capacity;
+  double *m_ptr;
 
   static constexpr double GROWTH_FACTOR = 2.0;
 
@@ -26,7 +28,7 @@ public:
   explicit Matrix(std::size_t rows, std::size_t columns);
 
   Matrix(const Matrix &other);
-  Matrix(Matrix &&other);
+  Matrix(Matrix &&other) noexcept;
 
   Matrix(std::initializer_list<std::initializer_list<double>> list);
   Matrix(std::initializer_list<double> list);
@@ -47,7 +49,7 @@ public:
   Matrix &operator*=(const Matrix &other);
   Matrix &operator*=(double value);
 
-  bool empty() const { return this->m_rows == 0 || this->m_columns == 0; }
+  bool empty() const { return size() == 0; }
 
   std::size_t rows() const { return this->m_rows; }
   std::size_t columns() const { return this->m_columns; }
@@ -63,7 +65,7 @@ public:
   void reserve(std::size_t number);
   void clear();
   void shrink_to_fit();
-  void swap(Matrix &destination);
+  void swap(Matrix &other);
 
   friend Matrix operator+(const Matrix &left, const Matrix &right);
   friend Matrix operator-(const Matrix &left, const Matrix &right);
