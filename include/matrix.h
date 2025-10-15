@@ -71,8 +71,8 @@ public:
   friend Matrix operator*(const Matrix &left, double value);
   friend Matrix operator*(double value, const Matrix &right);
 
-  friend Matrix operator==(const Matrix &left, const Matrix &right);
-  friend Matrix operator!=(const Matrix &left, const Matrix &right);
+  friend bool operator==(const Matrix &left, const Matrix &right);
+  friend bool operator!=(const Matrix &left, const Matrix &right);
 };
 
 inline void swap(Matrix &left_matrix, Matrix &right_matrix) {
@@ -85,8 +85,8 @@ Matrix operator*(const Matrix &left, const Matrix &right);
 Matrix operator*(const Matrix &left, double value);
 Matrix operator*(double value, const Matrix &right);
 
-Matrix operator==(const Matrix &left, const Matrix &right);
-Matrix operator!=(const Matrix &left, const Matrix &right);
+bool operator==(const Matrix &left, const Matrix &right);
+bool operator!=(const Matrix &left, const Matrix &right);
 } // namespace linalg
 
 #endif // LINALG_MATRIX_H
