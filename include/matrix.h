@@ -36,7 +36,7 @@ public:
   ~Matrix() { delete[] this->m_ptr; }
 
   Matrix &operator=(const Matrix &other);
-  Matrix &operator=(Matrix &&other);
+  Matrix &operator=(Matrix &&other) noexcept;
 
   double &operator()(std::size_t row, std::size_t col);
   const double &operator()(std::size_t row, std::size_t col) const;
