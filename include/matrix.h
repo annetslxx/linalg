@@ -6,23 +6,23 @@
 
 #include <cstddef>
 #include <initializer_list>
-#include <stdexcept>
-#include <algorithm>
+#include <ostream>
 
 namespace linalg {
 
 class Matrix {
 
 private:
-
   std::size_t m_rows;
   std::size_t m_columns;
   std::size_t m_capacity;
   double *m_ptr;
 
-  static constexpr double GROWTH_FACTOR = 2.0;
-
 public:
+
+  static constexpr double EPSILON = 1e-9;
+  static constexpr std::size_t PRECISION = 2;
+
   Matrix();
   explicit Matrix(std::size_t rows);
   explicit Matrix(std::size_t rows, std::size_t columns);
@@ -63,19 +63,20 @@ public:
 
   void reshape(std::size_t rows, std::size_t columns);
   void reserve(std::size_t number);
-  void clear();
+  void clear() noexcept;
   void shrink_to_fit();
-  void swap(Matrix &other);
+  void swap(Matrix &other) noexcept;
 
-  friend Matrix operator+(const Matrix &left, const Matrix &right);
-  friend Matrix operator-(const Matrix &left, const Matrix &right);
-  friend Matrix operator*(const Matrix &left, const Matrix &right);
-  friend Matrix operator*(const Matrix &left, double value);
-  friend Matrix operator*(double value, const Matrix &right);
-
-  friend bool operator==(const Matrix &left, const Matrix &right);
-  friend bool operator!=(const Matrix &left, const Matrix &right);
+  double norm() const;
+  double trace() const;
+  double det() const;
+  size_t rank() const;
+  void swap_rows(std::size_t i, std::size_t j) noexcept;
+  Matrix &gauss_forward();
+  Matrix &gauss_backward();
 };
+
+int get_double_width(double value);
 
 inline void swap(Matrix &left_matrix, Matrix &right_matrix) {
   left_matrix.swap(right_matrix);
@@ -89,6 +90,16 @@ Matrix operator*(double value, const Matrix &right);
 
 bool operator==(const Matrix &left, const Matrix &right);
 bool operator!=(const Matrix &left, const Matrix &right);
+
+std::ostream &operator<<(std::ostream &os, const Matrix &matrix);
+
+Matrix transpose(const Matrix &matrix);
+Matrix concatenate(const Matrix &left, const Matrix &right);
+Matrix solve(const Matrix &matr_A, const Matrix &vec_f);
+Matrix power(const Matrix &matr, int power);
+Matrix create_identity_matrix(std::size_t length);
+Matrix invert(const Matrix &matrix);
+
 } // namespace linalg
 
 #endif // LINALG_MATRIX_H

@@ -2,10 +2,14 @@
 // Created by Anna on 8.10.25.
 //
 
-#include "matrix.h"
+#include "../include/matrix.h"
+
+#include <cmath>
+#include <iostream>
+#include <stdexcept>
+#include <utility>
 
 namespace linalg {
-
 Matrix::Matrix() : m_ptr(nullptr), m_rows(0), m_columns(0), m_capacity(0) {};
 
 Matrix::Matrix(const std::size_t rows)
@@ -18,18 +22,14 @@ Matrix::Matrix(std::size_t rows, std::size_t columns)
 Matrix::Matrix(const Matrix &other)
     : m_rows(other.rows()), m_columns(other.columns()),
       m_capacity(other.capacity()), m_ptr(new double[other.capacity()]) {
-
   std::copy(other.begin(), other.end(), begin());
 }
 
 Matrix::Matrix(Matrix &&other) noexcept
     : m_ptr(other.begin()), m_rows(other.rows()), m_columns(other.columns()),
       m_capacity(other.capacity()) {
-
   other.m_ptr = nullptr;
-  other.m_rows = 0;
-  other.m_columns = 0;
-  other.m_capacity = 0;
+  other.m_rows = other.m_columns = other.m_capacity = 0;
 }
 
 Matrix::Matrix(std::initializer_list<std::initializer_list<double>> list)
@@ -43,7 +43,7 @@ Matrix::Matrix(std::initializer_list<std::initializer_list<double>> list)
     }
   }
   if (!empty()) {
-    double *iterator = this->begin();
+    double *iterator = begin();
     for (const auto &row : list) {
       std::copy(row.begin(), row.end(), iterator);
       iterator += m_columns;
@@ -54,106 +54,171 @@ Matrix::Matrix(std::initializer_list<std::initializer_list<double>> list)
 Matrix::Matrix(std::initializer_list<double> list)
     : m_rows(list.size()), m_columns(m_rows == 0 ? 0 : 1), m_capacity(m_rows),
       m_ptr(m_capacity == 0 ? nullptr : new double[m_capacity]()) {
-  if (!(this->empty()))
-    std::copy(list.begin(), list.end(), this->begin());
+  if (!empty())
+    std::copy(list.begin(), list.end(), begin());
 }
 
-// TODO add equality checking after == implemented
 Matrix &Matrix::operator=(const Matrix &other) {
   if (this == &other) {
     return *this;
   }
 
-  if (this->capacity() < other.size()) {
-    auto new_ptr = new double[other.size()];
-
-    std::copy(other.begin(), other.end(), new_ptr);
-
-    if (!(this->empty())) {
-      delete[] this->m_ptr;
-    }
-
-    this->m_ptr = new_ptr;
-    this->m_capacity = other.size();
-  } else {
-    std::copy(other.begin(), other.end(), this->begin());
-  }
-
-  this->m_rows = other.rows();
-  this->m_columns = other.columns();
+  reshape(other.rows(), other.columns());
+  std::copy(other.begin(), other.end(), begin());
 
   return *this;
 }
 
 Matrix &Matrix::operator=(Matrix &&other) noexcept {
+  if (this != &other) {
+    delete[] m_ptr;
 
-  delete[] m_ptr;
+    m_ptr = other.m_ptr;
+    m_rows = other.rows();
+    m_columns = other.columns();
+    m_capacity = other.capacity();
 
-  this->m_ptr = other.m_ptr;
-  this->m_rows = other.rows();
-  this->m_columns = other.columns();
-  this->m_capacity = other.capacity();
-
-  other.m_ptr = nullptr;
-  other.m_rows = 0;
-  other.m_columns = 0;
-  other.m_capacity = 0;
-
+    other.m_ptr = nullptr;
+    other.m_rows = other.m_columns = other.m_capacity = 0;
+  }
   return *this;
 }
 
-void Matrix::reshape(std::size_t rows, std::size_t columns) {
-
-  this->m_rows = rows;
-  this->m_columns = columns;
-
-  const std::size_t new_capacity = this->size();
-
-  if (new_capacity > this->m_capacity) {
-    auto new_ptr = new double[rows * columns]();
-
-    delete[] this->m_ptr;
-    this->m_ptr = new_ptr;
-    this->m_capacity = new_capacity;
-  }
-}
-
 void Matrix::reserve(std::size_t number) {
-  if (number > this->capacity()) {
+  if (number > capacity()) {
     auto new_ptr = new double[number]();
+    std::copy(begin(), end(), new_ptr);
 
-    delete[] this->m_ptr;
-    this->m_ptr = new_ptr;
-    this->m_capacity = number;
+    delete[] m_ptr;
+    m_ptr = new_ptr;
+    m_capacity = number;
   }
 }
 
-void Matrix::clear() { m_rows = m_columns = 0; }
+void Matrix::reshape(std::size_t rows, std::size_t columns) {
+  if ((rows == 0 || columns == 0) && (rows != columns))
+    throw std::runtime_error("It is not possible to allocate matrix with zero "
+                             "number of columns or rows");
+  const std::size_t new_capacity = rows * columns;
+  if (new_capacity > capacity())
+    reserve(new_capacity);
+
+  m_rows = rows;
+  m_columns = columns;
+}
+
+void Matrix::clear() noexcept { m_rows = m_columns = 0; }
 
 void Matrix::shrink_to_fit() {
-  if (this->capacity() == this->size()) {
+  if (capacity() == size())
+    return;
+
+  if (size() == 0) {
+    delete[] m_ptr;
+    m_ptr = nullptr;
+    m_capacity = 0;
     return;
   }
 
-  if (this->size() == 0) {
-    delete[] this->m_ptr;
-    this->m_ptr = nullptr;
-    this->m_capacity = 0;
-    return;
+  const size_t new_capacity = size();
+  auto new_ptr = new double[new_capacity]();
+  std::copy(begin(), end(), new_ptr);
+
+  delete[] m_ptr;
+  m_ptr = new_ptr;
+  m_capacity = new_capacity;
+}
+
+void Matrix::swap(Matrix &other) noexcept {
+  std::swap(m_ptr, other.m_ptr);
+  std::swap(m_rows, other.m_rows);
+  std::swap(m_columns, other.m_columns);
+  std::swap(m_capacity, other.m_capacity);
+}
+
+double &Matrix::operator()(std::size_t row, std::size_t col) {
+  if (row >= rows() || col >= columns()) {
+    throw std::runtime_error(
+        "Matrix indices out of range"); // Возможно стоит использовать
+                                        // out_of_range
+  }
+  return begin()[row * columns() + col];
+}
+
+const double &Matrix::operator()(std::size_t row, std::size_t col) const {
+  if (row >= rows() || col >= columns()) {
+    throw std::runtime_error(
+        "Matrix indices out of range"); // Возможно стоит использовать
+                                        // out_of_range
+  }
+  return begin()[row * columns() + col];
+}
+
+int get_double_width(double value) {
+  int width = 0;
+  if (value < 0) {
+    width += 1;
+    value = -value;
   }
 
-  auto new_ptr = new double[this->size()]();
-  std::copy(this->begin(), this->end(), new_ptr);
+  auto int_part = (long long)value;
+  if (int_part == 0) {
+    width += 1;
+  } else {
+    while (int_part > 0) {
+      int_part /= 10;
+      width += 1;
+    }
+  }
 
-  delete[] this->m_ptr;
-  this->m_ptr = new_ptr;
-  this->m_capacity = this->size();
+  if (Matrix::PRECISION > 0) {
+    width += 1;
+    width += Matrix::PRECISION;
+  }
+  return width;
 }
 
-void Matrix::swap(Matrix &other) {
-  std::swap(this->m_ptr, other.m_ptr);
-  std::swap(this->m_rows, other.m_rows);
-  std::swap(this->m_columns, other.m_columns);
-  std::swap(this->m_capacity, other.m_capacity);
+std::ostream &operator<<(std::ostream &os, const Matrix &matrix) {
+  if (matrix.empty()) {
+    os << "||";
+    return os;
+  }
+
+  auto col_widths = new int[matrix.columns()]();
+
+  for (std::size_t j = 0; j < matrix.columns(); ++j) {
+    for (std::size_t i = 0; i < matrix.rows(); ++i) {
+      int current_width = get_double_width(matrix(i, j));
+      if (current_width > col_widths[j]) {
+        col_widths[j] = current_width;
+      }
+    }
+  }
+
+  std::streamsize old_precision = os.precision();
+
+  os.setf(std::ios::fixed, std::ios::floatfield);
+  os.precision(Matrix::PRECISION);
+
+  for (std::size_t i = 0; i < matrix.rows(); ++i) {
+    os << "|";
+    for (std::size_t j = 0; j < matrix.columns(); ++j) {
+      os.width(col_widths[j]);
+      os << matrix(i, j);
+      if (j < matrix.columns() - 1) {
+        os << " ";
+      }
+    }
+    os << "|";
+    if (i < matrix.rows() - 1) {
+      os << "\n";
+    }
+  }
+
+  delete[] col_widths;
+  os.precision(old_precision);
+
+  return os;
 }
+
 } // namespace linalg
