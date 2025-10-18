@@ -368,4 +368,48 @@ Matrix concatenate(const Matrix &left, const Matrix &right) {
   return result;
 }
 
+void Matrix::swap_rows(std::size_t i, std::size_t j) noexcept {
+  if (i == j) return;
+  for (std::size_t col = 0; col < columns(); ++col)
+    std::swap((*this)(i, col), (*this)(j, col));
+}
+
+Matrix& Matrix::gauss_forward() {
+  std::size_t pivot_col = 0;
+
+  for (std::size_t pivot_row = 0; pivot_row < rows() && pivot_col < columns(); ++pivot_row) {
+    // Находим максимальный элемент в текущем столбце
+    double max_val = std::abs((*this)(pivot_row, pivot_col));
+    std::size_t max_row = pivot_row;
+
+    for (std::size_t row = pivot_row + 1; row < rows(); ++row) {
+      if (std::abs((*this)(row, pivot_col)) > max_val) {
+        max_val = std::abs((*this)(row, pivot_col));
+        max_row = row;
+      }
+    }
+
+    // Если весь столбец нулевой - переходим к следующему
+    if (max_val < EPSILON) {
+      ++pivot_col;
+      --pivot_row;  // Компенсируем инкремент в цикле
+      continue;
+    }
+    swap_rows(pivot_row, max_row);
+
+    // Обнуляем элементы ниже
+    for (std::size_t row = pivot_row + 1; row < rows(); ++row) {
+      // коэф = текущий эл-т / эл-т в строке, которая поднялась вверх
+      double coeff = (*this)(row, pivot_col) / (*this)(pivot_row, pivot_col);
+      for (std::size_t col = pivot_col; col < columns(); ++col) {
+        (*this)(row, col) -= coeff * (*this)(pivot_row, col);
+      }
+    }
+
+    ++pivot_col;
+  }
+
+  return *this;
+}
+
 } // namespace linalg
