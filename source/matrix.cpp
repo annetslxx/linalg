@@ -462,4 +462,24 @@ size_t Matrix::rank() const {
   return rank;
 }
 
+Matrix solve(const Matrix &matr_A, const Matrix &vec_f) {
+  Matrix full = concatenate(matr_A, vec_f).gauss_forward().gauss_backward();
+  Matrix solution(vec_f.rows(), vec_f.columns());
+  for (std::size_t i = 0; i < full.rows(); ++i) {
+    solution(i, 0) = full(i, full.columns() - 1);
+  }
+
+  return solution;
+}
+
+Matrix transpose(const Matrix &matrix) {
+  Matrix ret(matrix.columns(), matrix.rows());
+  for (std::size_t row = 0; row < matrix.rows(); ++row) {
+    for (std::size_t column = 0; column < matrix.columns(); ++column) {
+      ret(column, row) = matrix(row, column);
+    }
+  }
+  return ret;
+}
+
 } // namespace linalg
