@@ -278,10 +278,9 @@ Matrix &Matrix::operator*=(const Matrix &other) {
     for (std::size_t j = 0; j < other.columns(); ++j) {
       double sum = 0.0;
       for (std::size_t k = 0; k < columns(); ++k) {
-        sum += begin()[i * columns() + k] *
-                other.begin()[k * other.columns() + j];
+        sum += (*this)(i, k) * other(k, j);
       }
-      result.begin()[i * result.columns() + j] = sum;
+      result(i, j) = sum;
     }
   }
 
@@ -336,6 +335,12 @@ bool operator==(const Matrix &left, const Matrix &right) {
 
 bool operator!=(const Matrix &left, const Matrix &right) {
   return !(left == right); // Переиспользуем ==
+}
+
+double Matrix::norm() const {
+  double sum = 0.0;
+  for (const auto &x : *this) sum += x * x;
+  return std::sqrt(sum);
 }
 
 } // namespace linalg
