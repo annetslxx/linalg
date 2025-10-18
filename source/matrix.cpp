@@ -372,6 +372,40 @@ void Matrix::swap_rows(std::size_t i, std::size_t j) noexcept {
     std::swap((*this)(i, col), (*this)(j, col));
 }
 
+int Matrix::swap_count() const {
+
+  Matrix matrix(*this);
+  int count = 0;
+  std::size_t pivot_col = 0;
+
+  for (std::size_t pivot_row = 0;
+       pivot_row < matrix.rows() && pivot_col < matrix.columns(); ++pivot_row) {
+    // Находим максимальный элемент в текущем столбце
+    double max_val = std::abs(matrix(pivot_row, pivot_col));
+    std::size_t max_row = pivot_row;
+
+    for (std::size_t row = pivot_row + 1; row < matrix.rows(); ++row) {
+      if (std::abs(matrix(row, pivot_col)) > max_val) {
+        max_val = std::abs(matrix(row, pivot_col));
+        max_row = row;
+      }
+    }
+
+    // Если весь столбец нулевой - переходим к следующему
+    if (max_val < Matrix::EPSILON) {
+      ++pivot_col;
+      --pivot_row; // Компенсируем инкремент в цикле
+      continue;
+    }
+    if (pivot_row != max_row)
+      ++count; // увеличиваем счетчик, если макс. элемент не в верхней строке
+
+    ++pivot_col;
+  }
+
+  return count;
+}
+
 Matrix &Matrix::gauss_forward() {
   std::size_t pivot_col = 0;
 
@@ -443,7 +477,7 @@ double Matrix::det() const {
   double det = 1.0;
   for (std::size_t i = 0; i < temp.rows(); ++i)
     det *= temp(i, i);
-  return det;
+  return det * std::pow(-1, swap_count());
 }
 
 size_t Matrix::rank() const {
@@ -516,7 +550,8 @@ Matrix power(const Matrix &matrix, int power) {
 
   Matrix ret = power < 0 ? invert(matrix) : matrix;
   power = std::abs(power);
-  Matrix mlt(ret); // для того, чтобы если матрица стала обратной, умножать на нее, а не на исходную
+  Matrix mlt(ret); // для того, чтобы если матрица стала обратной, умножать на
+                   // нее, а не на исходную
   while (--power)
     ret *= mlt;
   return ret;

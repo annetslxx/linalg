@@ -19,7 +19,6 @@ private:
   double *m_ptr;
 
 public:
-
   static constexpr double EPSILON = 1e-9;
   static constexpr std::size_t PRECISION = 2;
 
@@ -74,6 +73,8 @@ public:
   void swap_rows(std::size_t i, std::size_t j) noexcept;
   Matrix &gauss_forward();
   Matrix &gauss_backward();
+
+  int swap_count() const;
 };
 
 int get_double_width(double value);
