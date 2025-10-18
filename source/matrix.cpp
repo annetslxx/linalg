@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <utility>
+#include <sstream>
 
 namespace linalg {
 Matrix::Matrix() : m_ptr(nullptr), m_rows(0), m_columns(0), m_capacity(0) {};
@@ -143,82 +144,52 @@ const double &Matrix::operator()(std::size_t row, std::size_t col) const {
   return begin()[row * columns() + col];
 }
 
-int get_double_width(double value, std::streamsize precision) {
-  int width = 0;
-  if (value < 0) {
-    width += 1;
-    value = -value;
-  }
-
-  if (value - floor(value) > Matrix::EPSILON)
-    ++width;
-
-  value *= pow(10, precision);
-
-  auto int_part = (long long)value;
-  bool has_digit_on_end = false;
-  if (int_part == 0) {
-    width += 1;
-  } else {
-    while (int_part > 0) {
-      has_digit_on_end = (has_digit_on_end || int_part % 10 != 0);
-      width = has_digit_on_end ? width + 1 : width;
-      int_part /= 10;
-    }
-  }
-
-  return width;
-}
-
-std::ostream &operator<<(std::ostream &os, const Matrix &matrix) {
+std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {
   if (matrix.empty()) {
-    os << "||";
     return os;
   }
+  size_t first_col_max_width = 0;
+  size_t other_matrix = 0;
 
-  int max_width = 0;
-  int first_col_width = 0;
-  int precision = (int)os.precision();
+  std::stringstream ss;
+  ss.copyfmt(os);
 
-  for (std::size_t j = 0; j < matrix.columns(); ++j) {
-    for (std::size_t i = 0; i < matrix.rows(); ++i) {
-      int current_width = get_double_width(matrix(i, j), precision);
-
+  for (size_t i = 0; i < matrix.rows(); ++i) {
+    for (size_t j = 0; j < matrix.columns(); ++j) {
+      ss << matrix(i, j);
+      size_t current_width = ss.str().length();
       if (j == 0) {
-        if (current_width > first_col_width) {
-          first_col_width = current_width;
+        if (current_width > first_col_max_width) {
+          first_col_max_width = current_width;
+        }
+      } else {
+        if (current_width > other_matrix) {
+          other_matrix = current_width;
         }
       }
-
-      if (current_width > max_width) {
-        max_width = current_width;
-      }
+      ss.str("");
+      ss.clear();
     }
   }
 
-  os.precision(precision + 1);
 
-  for (std::size_t i = 0; i < matrix.rows(); ++i) {
+  for (size_t i = 0; i < matrix.rows(); ++i) {
     os << "|";
-    for (std::size_t j = 0; j < matrix.columns(); ++j) {
-      if (j == 0)
-        os.width(first_col_width);
-      else
-        os.width(max_width);
 
-      os << matrix(i, j);
-      if (j < matrix.columns() - 1) {
+    for (size_t j = 0; j < matrix.columns(); ++j) {
+      if (j > 0) {
         os << " ";
       }
+
+      size_t required_width = (j == 0) ? first_col_max_width : other_matrix;
+      os.width(required_width);
+      os << matrix(i, j);
     }
     os << "|";
-    if (i < matrix.rows() - 1) {
+    if (i != matrix.rows() - 1) {
       os << "\n";
     }
   }
-
-  os.precision(precision);
-
   return os;
 }
 

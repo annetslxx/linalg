@@ -76,8 +76,6 @@ public:
   int swap_count() const;
 };
 
-int get_double_width(double value, std::streamsize precision);
-
 inline void swap(Matrix &left_matrix, Matrix &right_matrix) {
   left_matrix.swap(right_matrix);
 }
