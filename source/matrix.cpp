@@ -413,7 +413,8 @@ Matrix &Matrix::gauss_forward() {
 
 Matrix &Matrix::gauss_backward() {
 
-  for (int i = (int)rows() - 1; i >= 0; --i) { // чтобы i могло стать отрицательным
+  for (int i = (int)rows() - 1; i >= 0;
+       --i) { // чтобы i могло стать отрицательным
     double diag = (*this)(i, i);
     if (std::fabs(diag) < EPSILON)
       throw std::runtime_error("Zero on diagonal");
@@ -425,12 +426,40 @@ Matrix &Matrix::gauss_backward() {
     // Вычитаем текущую строку из всех выше стоящих
     for (int k = i - 1; k >= 0; --k) {
       double factor = (*this)(k, i);
-      for (std::size_t j = 0; j < columns(); ++j) // из каждого элемента строки вычитаем элемент строки,
-                                                  // где опорный элемент стал единицей
+      for (std::size_t j = 0; j < columns();
+           ++j) // из каждого элемента строки вычитаем элемент строки,
+                // где опорный элемент стал единицей
         (*this)(k, j) -= factor * (*this)(i, j);
     }
   }
   return *this;
+}
+
+double Matrix::det() const {
+  if (rows() != columns())
+    throw std::runtime_error("Matrix must be square");
+  Matrix temp = *this;
+  temp.gauss_forward();
+  double det = 1.0;
+  for (std::size_t i = 0; i < temp.rows(); ++i)
+    det *= temp(i, i);
+  return det;
+}
+
+size_t Matrix::rank() const {
+  Matrix temp = *this;
+  temp.gauss_forward();
+  size_t rank = 0;
+
+  bool is_not_null;
+  for (size_t row = 0; row < temp.rows(); ++row) {
+    is_not_null = false; // считаем, что строка нулевая
+    for (size_t col = 0; col < temp.columns() && !is_not_null; ++col) {
+      is_not_null = std::fabs(temp(row, col)) > EPSILON;
+    }
+    rank = is_not_null ? rank + 1 : rank;
+  }
+  return rank;
 }
 
 } // namespace linalg
