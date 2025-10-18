@@ -352,4 +352,20 @@ double Matrix::trace() const {
   return sum;
 }
 
+Matrix concatenate(const Matrix &left, const Matrix &right) {
+  if (left.rows() != right.rows())
+    throw std::runtime_error("Matrix must have the same number of rows");
+  Matrix result(left.rows(), left.columns() + right.columns());
+
+  auto result_iterator = result.begin();
+  for (size_t i = 0; i < result.rows(); ++i) {
+    std::copy(left.begin() + i * left.columns(), left.begin() + (i + 1) * left.columns(), result_iterator);
+    result_iterator += left.columns();
+    std::copy(right.begin() + i * right.columns(), right.begin() + (i + 1) * right.columns(), result_iterator);
+    result_iterator += right.columns();
+  }
+
+  return result;
+}
+
 } // namespace linalg
