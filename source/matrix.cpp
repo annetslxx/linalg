@@ -221,9 +221,7 @@ std::ostream &operator<<(std::ostream &os, const Matrix &matrix) {
   return os;
 }
 
-Matrix Matrix::operator+() const {
-  return *this;
-}
+Matrix Matrix::operator+() const { return *this; }
 
 Matrix Matrix::operator-() const {
   Matrix result(rows(), columns());
@@ -300,13 +298,11 @@ Matrix operator-(const Matrix &left, const Matrix &right) {
   return result;
 }
 
-
 Matrix operator*(const Matrix &left, const Matrix &right) {
   Matrix result(left);
   result *= right;
   return result;
 }
-
 
 Matrix operator*(const Matrix &matrix, double value) {
   Matrix result(matrix);
@@ -314,9 +310,7 @@ Matrix operator*(const Matrix &matrix, double value) {
   return result;
 }
 
-Matrix operator*(double value, const Matrix &matrix) {
-  return matrix * value;
-}
+Matrix operator*(double value, const Matrix &matrix) { return matrix * value; }
 
 bool operator==(const Matrix &left, const Matrix &right) {
   // Разные размерности - не равны
@@ -339,7 +333,8 @@ bool operator!=(const Matrix &left, const Matrix &right) {
 
 double Matrix::norm() const {
   double sum = 0.0;
-  for (const auto &x : *this) sum += x * x;
+  for (const auto &x : *this)
+    sum += x * x;
   return std::sqrt(sum);
 }
 
@@ -359,9 +354,11 @@ Matrix concatenate(const Matrix &left, const Matrix &right) {
 
   auto result_iterator = result.begin();
   for (size_t i = 0; i < result.rows(); ++i) {
-    std::copy(left.begin() + i * left.columns(), left.begin() + (i + 1) * left.columns(), result_iterator);
+    std::copy(left.begin() + i * left.columns(),
+              left.begin() + (i + 1) * left.columns(), result_iterator);
     result_iterator += left.columns();
-    std::copy(right.begin() + i * right.columns(), right.begin() + (i + 1) * right.columns(), result_iterator);
+    std::copy(right.begin() + i * right.columns(),
+              right.begin() + (i + 1) * right.columns(), result_iterator);
     result_iterator += right.columns();
   }
 
@@ -369,15 +366,17 @@ Matrix concatenate(const Matrix &left, const Matrix &right) {
 }
 
 void Matrix::swap_rows(std::size_t i, std::size_t j) noexcept {
-  if (i == j) return;
+  if (i == j)
+    return;
   for (std::size_t col = 0; col < columns(); ++col)
     std::swap((*this)(i, col), (*this)(j, col));
 }
 
-Matrix& Matrix::gauss_forward() {
+Matrix &Matrix::gauss_forward() {
   std::size_t pivot_col = 0;
 
-  for (std::size_t pivot_row = 0; pivot_row < rows() && pivot_col < columns(); ++pivot_row) {
+  for (std::size_t pivot_row = 0; pivot_row < rows() && pivot_col < columns();
+       ++pivot_row) {
     // Находим максимальный элемент в текущем столбце
     double max_val = std::abs((*this)(pivot_row, pivot_col));
     std::size_t max_row = pivot_row;
@@ -392,7 +391,7 @@ Matrix& Matrix::gauss_forward() {
     // Если весь столбец нулевой - переходим к следующему
     if (max_val < EPSILON) {
       ++pivot_col;
-      --pivot_row;  // Компенсируем инкремент в цикле
+      --pivot_row; // Компенсируем инкремент в цикле
       continue;
     }
     swap_rows(pivot_row, max_row);
@@ -409,6 +408,28 @@ Matrix& Matrix::gauss_forward() {
     ++pivot_col;
   }
 
+  return *this;
+}
+
+Matrix &Matrix::gauss_backward() {
+
+  for (int i = (int)rows() - 1; i >= 0; --i) { // чтобы i могло стать отрицательным
+    double diag = (*this)(i, i);
+    if (std::fabs(diag) < EPSILON)
+      throw std::runtime_error("Zero on diagonal");
+
+    // Нормируем текущую строку
+    for (std::size_t j = 0; j < columns(); ++j)
+      (*this)(i, j) /= diag;
+
+    // Вычитаем текущую строку из всех выше стоящих
+    for (int k = i - 1; k >= 0; --k) {
+      double factor = (*this)(k, i);
+      for (std::size_t j = 0; j < columns(); ++j) // из каждого элемента строки вычитаем элемент строки,
+                                                  // где опорный элемент стал единицей
+        (*this)(k, j) -= factor * (*this)(i, j);
+    }
+  }
   return *this;
 }
 
