@@ -343,4 +343,13 @@ double Matrix::norm() const {
   return std::sqrt(sum);
 }
 
+double Matrix::trace() const {
+  if (rows() != columns())
+    throw std::runtime_error("Trace is defined only for square matrices");
+  double sum = 0.0;
+  for (std::size_t i = 0; i < rows(); ++i)
+    sum += (*this)(i, i);
+  return sum;
+}
+
 } // namespace linalg
