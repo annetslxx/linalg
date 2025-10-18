@@ -20,7 +20,6 @@ private:
 
 public:
   static constexpr double EPSILON = 1e-9;
-  static constexpr std::size_t PRECISION = 2;
 
   Matrix();
   explicit Matrix(std::size_t rows);
@@ -77,7 +76,7 @@ public:
   int swap_count() const;
 };
 
-int get_double_width(double value);
+int get_double_width(double value, std::streamsize precision);
 
 inline void swap(Matrix &left_matrix, Matrix &right_matrix) {
   left_matrix.swap(right_matrix);
