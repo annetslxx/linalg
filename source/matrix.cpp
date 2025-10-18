@@ -482,4 +482,44 @@ Matrix transpose(const Matrix &matrix) {
   return ret;
 }
 
+Matrix create_identity_matrix(std::size_t length) {
+  Matrix ret(length, length);
+  for (std::size_t i = 0; i < length; i++) {
+    ret(i, i) = 1;
+  }
+  return ret;
+}
+
+Matrix invert(const Matrix &matrix) {
+  if (matrix.rows() != matrix.columns())
+    throw std::runtime_error("Matrix must be square");
+  Matrix full = concatenate(matrix, create_identity_matrix(matrix.rows()))
+                    .gauss_forward()
+                    .gauss_backward();
+  Matrix ret(matrix.rows(), matrix.columns());
+
+  for (std::size_t row = 0; row < ret.rows(); ++row) {
+    for (std::size_t column = 0; column < ret.columns(); ++column) {
+      ret(row, column) = full(row, column + matrix.columns());
+    }
+  }
+
+  return ret;
+}
+
+Matrix power(const Matrix &matrix, int power) {
+  if (matrix.rows() != matrix.columns())
+    throw std::runtime_error("Matrix must be square");
+
+  if (power == 0)
+    return create_identity_matrix(matrix.rows());
+
+  Matrix ret = power < 0 ? invert(matrix) : matrix;
+  power = std::abs(power);
+  Matrix mlt(ret); // для того, чтобы если матрица стала обратной, умножать на нее, а не на исходную
+  while (--power)
+    ret *= mlt;
+  return ret;
+}
+
 } // namespace linalg
