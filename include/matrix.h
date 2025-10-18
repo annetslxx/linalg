@@ -31,7 +31,7 @@ public:
   Matrix(std::initializer_list<std::initializer_list<double>> list);
   Matrix(std::initializer_list<double> list);
 
-  ~Matrix() { delete[] this->m_ptr; }
+  ~Matrix() { delete[] m_ptr; }
 
   Matrix &operator=(const Matrix &other);
   Matrix &operator=(Matrix &&other) noexcept;
@@ -49,15 +49,15 @@ public:
 
   bool empty() const { return size() == 0; }
 
-  std::size_t rows() const { return this->m_rows; }
-  std::size_t columns() const { return this->m_columns; }
-  std::size_t capacity() const { return this->m_capacity; }
-  std::size_t size() const { return this->m_rows * this->m_columns; }
+  std::size_t rows() const { return m_rows; }
+  std::size_t columns() const { return m_columns; }
+  std::size_t capacity() const { return m_capacity; }
+  std::size_t size() const { return m_rows * m_columns; }
 
-  double *begin() { return this->m_ptr; }
-  double *end() { return this->m_ptr + this->size(); }
-  const double *begin() const { return this->m_ptr; }
-  const double *end() const { return this->m_ptr + this->size(); }
+  double *begin() { return m_ptr; }
+  double *end() { return m_ptr + size(); }
+  const double *begin() const { return m_ptr; }
+  const double *end() const { return m_ptr + size(); }
 
   void reshape(std::size_t rows, std::size_t columns);
   void reserve(std::size_t number);
