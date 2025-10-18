@@ -29,12 +29,9 @@ Matrix::Matrix(const Matrix &other)
   std::copy(other.begin(), other.end(), begin());
 }
 
-Matrix::Matrix(Matrix &&other) noexcept
-    : m_ptr(other.begin()), m_rows(other.rows()), m_columns(other.columns()),
-      m_capacity(other.capacity()) {
-  other.m_ptr = nullptr;
+Matrix::Matrix(Matrix &&other) noexcept : m_ptr(nullptr), m_rows(0), m_columns(0), m_capacity(0){
+  swap(other);
 }
-
 Matrix::Matrix(std::initializer_list<std::initializer_list<double>> list)
     : m_rows(list.size()), m_columns(m_rows == 0 ? 0 : list.begin()->size()),
       m_capacity(m_rows * m_columns),
@@ -66,16 +63,8 @@ Matrix &Matrix::operator=(const Matrix &other) {
     return *this;
   }
 
-  m_capacity = other.capacity();
-  delete[] m_ptr;
-  m_ptr = new double[capacity()]();
+  reshape(other.rows(), other.columns());
   std::copy(other.begin(), other.end(), begin());
-
-  m_rows = other.rows();
-  m_columns = other.columns();
-
-  // reshape(other.rows(), other.columns());
-  // std::copy(other.begin(), other.end(), begin());
 
   return *this;
 }
@@ -161,20 +150,23 @@ int get_double_width(double value, std::streamsize precision) {
     value = -value;
   }
 
+  if (value - floor(value) > Matrix::EPSILON)
+    ++width;
+
+  value *= pow(10, precision);
+
   auto int_part = (long long)value;
+  bool has_digit_on_end = false;
   if (int_part == 0) {
     width += 1;
   } else {
     while (int_part > 0) {
+      has_digit_on_end = (has_digit_on_end || int_part % 10 != 0);
+      width = has_digit_on_end ? width + 1 : width;
       int_part /= 10;
-      width += 1;
     }
   }
 
-  if (precision > 0) {
-    width += 1;
-    width += (int)precision;
-  }
   return width;
 }
 
@@ -185,22 +177,35 @@ std::ostream &operator<<(std::ostream &os, const Matrix &matrix) {
   }
 
   int max_width = 0;
+  int first_col_width = 0;
+  int precision = (int)os.precision();
 
   for (std::size_t j = 0; j < matrix.columns(); ++j) {
     for (std::size_t i = 0; i < matrix.rows(); ++i) {
-      int current_width = get_double_width(matrix(i, j), os.precision());
+      int current_width = get_double_width(matrix(i, j), precision);
+
+      if (j == 0) {
+        if (current_width > first_col_width) {
+          first_col_width = current_width;
+        }
+      }
+
       if (current_width > max_width) {
         max_width = current_width;
       }
     }
   }
 
-
+  os.precision(precision + 1);
 
   for (std::size_t i = 0; i < matrix.rows(); ++i) {
     os << "|";
     for (std::size_t j = 0; j < matrix.columns(); ++j) {
-      os.width(max_width);
+      if (j == 0)
+        os.width(first_col_width);
+      else
+        os.width(max_width);
+
       os << matrix(i, j);
       if (j < matrix.columns() - 1) {
         os << " ";
@@ -211,6 +216,8 @@ std::ostream &operator<<(std::ostream &os, const Matrix &matrix) {
       os << "\n";
     }
   }
+
+  os.precision(precision);
 
   return os;
 }
