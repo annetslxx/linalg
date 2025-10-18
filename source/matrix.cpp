@@ -26,7 +26,7 @@ Matrix::Matrix(std::size_t rows, std::size_t columns)
 
 Matrix::Matrix(const Matrix &other)
     : m_rows(other.rows()), m_columns(other.columns()),
-      m_capacity(other.capacity()), m_ptr(new double[other.capacity()]()) {
+      m_capacity(other.size()), m_ptr(new double[other.size()]()) {
   std::copy(other.begin(), other.end(), begin());
 }
 
