@@ -21,7 +21,7 @@ Matrix::Matrix(std::size_t rows, std::size_t columns)
 
 Matrix::Matrix(const Matrix &other)
     : m_rows(other.rows()), m_columns(other.columns()),
-      m_capacity(other.capacity()), m_ptr(new double[other.capacity()]) {
+      m_capacity(other.capacity()), m_ptr(new double[other.capacity()]()) {
   std::copy(other.begin(), other.end(), begin());
 }
 
@@ -219,6 +219,123 @@ std::ostream &operator<<(std::ostream &os, const Matrix &matrix) {
   os.precision(old_precision);
 
   return os;
+}
+
+Matrix Matrix::operator+() const {
+  return *this;
+}
+
+Matrix Matrix::operator-() const {
+  Matrix result(rows(), columns());
+  for (std::size_t i = 0; i < size(); ++i) {
+    result.begin()[i] = -begin()[i];
+  }
+  return result;
+}
+
+Matrix &Matrix::operator+=(const Matrix &other) {
+  // Проверка размерностей
+  if (rows() != other.rows() || columns() != other.columns()) {
+    throw std::runtime_error("Matrix dimensions must match for addition");
+  }
+
+  for (std::size_t i = 0; i < size(); ++i) {
+    begin()[i] += other.begin()[i];
+  }
+
+  return *this;
+}
+
+Matrix &Matrix::operator-=(const Matrix &other) {
+  if (rows() != other.rows() || columns() != other.columns()) {
+    throw std::runtime_error("Matrix dimensions must match for subtraction");
+  }
+
+  for (std::size_t i = 0; i < size(); ++i) {
+    begin()[i] -= other.begin()[i];
+  }
+
+  return *this;
+}
+
+Matrix &Matrix::operator*=(double value) {
+  for (std::size_t i = 0; i < size(); ++i) {
+    begin()[i] *= value;
+  }
+  return *this;
+}
+
+Matrix &Matrix::operator*=(const Matrix &other) {
+  // A(m×n) * B(n×k) = C(m×k)
+  if (columns() != other.rows()) {
+    throw std::runtime_error(
+        "Matrix dimensions incompatible for multiplication");
+  }
+
+  Matrix result(rows(), other.columns());
+
+  for (std::size_t i = 0; i < rows(); ++i) {
+    for (std::size_t j = 0; j < other.columns(); ++j) {
+      double sum = 0.0;
+      for (std::size_t k = 0; k < columns(); ++k) {
+        sum += begin()[i * columns() + k] *
+                other.begin()[k * other.columns() + j];
+      }
+      result.begin()[i * result.columns() + j] = sum;
+    }
+  }
+
+  *this = std::move(result);
+  return *this;
+}
+
+Matrix operator+(const Matrix &left, const Matrix &right) {
+  Matrix result(left);
+  result += right;
+  return result;
+}
+
+Matrix operator-(const Matrix &left, const Matrix &right) {
+  Matrix result(left);
+  result -= right;
+  return result;
+}
+
+
+Matrix operator*(const Matrix &left, const Matrix &right) {
+  Matrix result(left);
+  result *= right;
+  return result;
+}
+
+
+Matrix operator*(const Matrix &matrix, double value) {
+  Matrix result(matrix);
+  result *= value;
+  return result;
+}
+
+Matrix operator*(double value, const Matrix &matrix) {
+  return matrix * value;
+}
+
+bool operator==(const Matrix &left, const Matrix &right) {
+  // Разные размерности - не равны
+  if (left.rows() != right.rows() || left.columns() != right.columns()) {
+    return false;
+  }
+
+  for (std::size_t i = 0; i < left.size(); ++i) {
+    if (!(std::abs(left.begin()[i] - right.begin()[i]) <= Matrix::EPSILON)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool operator!=(const Matrix &left, const Matrix &right) {
+  return !(left == right); // Переиспользуем ==
 }
 
 } // namespace linalg
