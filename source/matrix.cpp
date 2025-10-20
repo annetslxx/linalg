@@ -2,7 +2,7 @@
 // Created by Anna on 8.10.25.
 //
 
-#include "../include/matrix.h"
+#include <matrix.h>
 
 #include <cmath>
 #include <iostream>

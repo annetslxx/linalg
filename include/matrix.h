@@ -19,7 +19,7 @@ private:
   double *m_ptr;
 
 public:
-  static constexpr double EPSILON = 1e-9;
+  inline static double EPSILON = 1e-9;
 
   Matrix();
   explicit Matrix(std::size_t rows);
@@ -47,17 +47,17 @@ public:
   Matrix &operator*=(const Matrix &other);
   Matrix &operator*=(double value);
 
-  bool empty() const { return size() == 0; }
+  bool empty() const noexcept { return size() == 0; }
 
-  std::size_t rows() const { return m_rows; }
-  std::size_t columns() const { return m_columns; }
-  std::size_t capacity() const { return m_capacity; }
-  std::size_t size() const { return m_rows * m_columns; }
+  std::size_t rows() const noexcept { return m_rows; }
+  std::size_t columns() const noexcept { return m_columns; }
+  std::size_t capacity() const noexcept { return m_capacity; }
+  std::size_t size() const noexcept { return m_rows * m_columns; }
 
-  double *begin() { return m_ptr; }
-  double *end() { return m_ptr + size(); }
-  const double *begin() const { return m_ptr; }
-  const double *end() const { return m_ptr + size(); }
+  double *begin() noexcept { return m_ptr; }
+  double *end() noexcept { return m_ptr + size(); }
+  const double *begin() const noexcept { return m_ptr; }
+  const double *end() const noexcept { return m_ptr + size(); }
 
   void reshape(std::size_t rows, std::size_t columns);
   void reserve(std::size_t number);
