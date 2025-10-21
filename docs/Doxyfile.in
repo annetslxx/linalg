@@ -1,0 +1,143 @@
+#---------------------------------------------------------------------------
+# Project related configuration options
+#---------------------------------------------------------------------------
+
+PROJECT_NAME           = "linalg"
+PROJECT_NUMBER         = "1.0"
+PROJECT_BRIEF          = "Linear Algebra Library in C++"
+PROJECT_LOGO           =
+
+OUTPUT_DIRECTORY       = "@DOXYGEN_OUTPUT_DIR@"
+
+CREATE_SUBDIRS         = NO
+
+OUTPUT_LANGUAGE        = Russian
+
+BRIEF_MEMBER_DESC      = YES
+REPEAT_BRIEF           = YES
+
+ALWAYS_DETAILED_SEC    = NO
+
+INLINE_INHERITED_MEMB  = NO
+
+FULL_PATH_NAMES        = YES
+
+STRIP_FROM_PATH        = "@CMAKE_CURRENT_SOURCE_DIR@"
+
+SHORT_NAMES            = NO
+
+JAVADOC_AUTOBRIEF      = YES
+
+MULTILINE_CPP_IS_BRIEF = NO
+
+TAB_SIZE               = 4
+
+OPTIMIZE_OUTPUT_FOR_C  = NO
+OPTIMIZE_OUTPUT_JAVA   = NO
+
+BUILTIN_STL_SUPPORT    = YES
+
+#---------------------------------------------------------------------------
+# Build related configuration options
+#---------------------------------------------------------------------------
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+
+CASE_SENSE_NAMES       = YES
+
+SHOW_INCLUDE_FILES     = YES
+
+INLINE_INFO            = YES
+
+SORT_MEMBER_DOCS       = YES
+SORT_BRIEF_DOCS        = NO
+
+GENERATE_TODOLIST      = YES
+GENERATE_TESTLIST      = YES
+GENERATE_BUGLIST       = YES
+GENERATE_DEPRECATEDLIST= YES
+
+#---------------------------------------------------------------------------
+# Configuration options related to warning and progress messages
+#---------------------------------------------------------------------------
+
+QUIET                  = NO
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = YES
+
+#---------------------------------------------------------------------------
+# Configuration options related to the input files
+#---------------------------------------------------------------------------
+
+INPUT                  = "@CMAKE_CURRENT_SOURCE_DIR@/include" \
+                         "@CMAKE_CURRENT_SOURCE_DIR@/source" \
+                         "@CMAKE_CURRENT_SOURCE_DIR@/docs"
+
+FILE_PATTERNS          = *.h \
+                         *.hpp \
+                         *.cpp \
+                         *.dox
+
+RECURSIVE              = YES
+
+EXCLUDE                =
+
+EXCLUDE_PATTERNS       = */build/* \
+                         */cmake-build-*/*
+
+EXAMPLE_PATH           = "@CMAKE_CURRENT_SOURCE_DIR@/examples"
+
+EXAMPLE_PATTERNS       = *.cpp \
+                         *.h
+
+IMAGE_PATH             = "@CMAKE_CURRENT_SOURCE_DIR@/docs/images"
+
+INPUT_ENCODING         = UTF-8
+
+#---------------------------------------------------------------------------
+# Configuration options related to source browsing
+#---------------------------------------------------------------------------
+
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = YES
+
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+USE_HTAGS              = NO
+
+VERBATIM_HEADERS       = YES
+
+#---------------------------------------------------------------------------
+# Configuration options related to the alphabetical class index
+#---------------------------------------------------------------------------
+
+ALPHABETICAL_INDEX     = YES
+
+#---------------------------------------------------------------------------
+# Configuration options related to the HTML output
+#---------------------------------------------------------------------------
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+
+HTML_COLORSTYLE        = LIGHT
+
+HTML_DYNAMIC_MENUS     = YES
+HTML_DYNAMIC_SECTIONS  = YES
+
+GENERATE_DOCSET        = NO
+GENERATE_TREEVIEW      = YES
+
+SEARCHENGINE           = YES
+SERVER_BASED_SEARCH    = NO
