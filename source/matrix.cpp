@@ -6,22 +6,23 @@
 
 #include <cmath>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <utility>
-#include <sstream>
 
 namespace linalg {
 Matrix::Matrix() : m_ptr(nullptr), m_rows(0), m_columns(0), m_capacity(0) {};
 
 Matrix::Matrix(const std::size_t rows)
-    : m_ptr(rows == 0 ? nullptr : new double[rows]()), m_rows(rows), m_columns(rows == 0 ? 0 : 1), m_capacity(rows == 0 ? 0 : rows) {
-}
+    : m_ptr(rows == 0 ? nullptr : new double[rows]()), m_rows(rows),
+      m_columns(rows == 0 ? 0 : 1), m_capacity(rows == 0 ? 0 : rows) {}
 
 Matrix::Matrix(std::size_t rows, std::size_t columns)
     : m_ptr(new double[rows * columns]()), m_rows(rows), m_columns(columns),
       m_capacity(rows * columns) {
   if ((rows == 0 || columns == 0) && (rows != columns))
-    throw std::runtime_error("A matrix cannot contain zero number of columns or rows");
+    throw std::runtime_error(
+        "A matrix cannot contain zero number of columns or rows");
 }
 
 Matrix::Matrix(const Matrix &other)
@@ -30,7 +31,8 @@ Matrix::Matrix(const Matrix &other)
   std::copy(other.begin(), other.end(), begin());
 }
 
-Matrix::Matrix(Matrix &&other) noexcept : m_ptr(nullptr), m_rows(0), m_columns(0), m_capacity(0){
+Matrix::Matrix(Matrix &&other) noexcept
+    : m_ptr(nullptr), m_rows(0), m_columns(0), m_capacity(0) {
   swap(other);
 }
 Matrix::Matrix(std::initializer_list<std::initializer_list<double>> list)
@@ -88,7 +90,8 @@ void Matrix::reserve(std::size_t number) {
 
 void Matrix::reshape(std::size_t rows, std::size_t columns) {
   if ((rows == 0 || columns == 0) && (rows != columns))
-    throw std::runtime_error("A matrix cannot contain zero number of columns or rows");
+    throw std::runtime_error(
+        "A matrix cannot contain zero number of columns or rows");
   const std::size_t new_capacity = rows * columns;
   if (new_capacity > capacity())
     reserve(new_capacity);
@@ -144,7 +147,7 @@ const double &Matrix::operator()(std::size_t row, std::size_t col) const {
   return begin()[row * columns() + col];
 }
 
-std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {
+std::ostream &operator<<(std::ostream &os, const Matrix &matrix) {
   if (matrix.empty()) {
     return os;
   }
@@ -171,7 +174,6 @@ std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {
       ss.clear();
     }
   }
-
 
   for (size_t i = 0; i < matrix.rows(); ++i) {
     os << "|";
@@ -303,17 +305,18 @@ bool operator!=(const Matrix &left, const Matrix &right) {
   return !(left == right); // Переиспользуем ==
 }
 
-Matrix::Row::Row(double* row_ptr, std::size_t columns) noexcept
-  : m_row_ptr(row_ptr), m_columns(columns) {}
+Matrix::Row::Row(double *row_ptr, std::size_t columns) noexcept
+    : m_row_ptr(row_ptr), m_columns(columns) {}
 
-//реализация оператора []
-double& Matrix::Row::operator[](std::size_t col) {
+// реализация оператора []
+double &Matrix::Row::operator[](std::size_t col) {
   if (col >= m_columns) // индекс столбца не выходит за пределы матрицы
     throw std::runtime_error("Column index out of range");
-  return m_row_ptr[col]; // все равно что *(m_row_ptr + col), те получаем уже сам элемент
+  return m_row_ptr[col]; // все равно что *(m_row_ptr + col), те получаем уже
+                         // сам элемент
 }
 
-const double& Matrix::Row::operator[](std::size_t col) const {
+const double &Matrix::Row::operator[](std::size_t col) const {
   if (col >= m_columns)
     throw std::runtime_error("Column index out of range");
   return m_row_ptr[col];
@@ -446,7 +449,7 @@ Matrix &Matrix::gauss_forward() {
     }
 
     ++pivot_col;
-       }
+  }
 
   return *this;
 }
@@ -471,10 +474,10 @@ Matrix &Matrix::gauss_backward() {
       double factor = (*this)(k, i);
       for (std::size_t j = 0; j < columns();
            ++j) // из каждого элемента строки вычитаем элемент строки,
-             // где опорный элемент стал единицей
-               (*this)(k, j) -= factor * (*this)(i, j);
+                // где опорный элемент стал единицей
+        (*this)(k, j) -= factor * (*this)(i, j);
     }
-       }
+  }
   return *this;
 }
 
@@ -509,7 +512,8 @@ size_t Matrix::rank() const {
 
 Matrix solve(const Matrix &matr_A, const Matrix &vec_f) {
   if (matr_A.rank() != vec_f.rows())
-    throw std::runtime_error("The system has either no solution or infinitely many solutions");
+    throw std::runtime_error(
+        "The system has either no solution or infinitely many solutions");
   Matrix full = concatenate(matr_A, vec_f).gauss_forward().gauss_backward();
   Matrix solution(vec_f.rows(), vec_f.columns());
   for (std::size_t i = 0; i < full.rows(); ++i) {
@@ -568,6 +572,30 @@ Matrix power(const Matrix &matrix, int power) {
   while (--power)
     ret *= mlt;
   return ret;
+}
+
+std::pair<Matrix, Matrix> Matrix::lu_decompose() const {
+  if (empty())
+    throw std::runtime_error("Matrix is empty");
+  if (rows() != columns())
+    throw std::runtime_error("Matrix must be square for LU decomposition");
+
+  Matrix L = create_identity_matrix(rows());
+  Matrix U(*this);
+
+  for (std::size_t k = 0; k < rows(); ++k) {
+    if (std::abs(U(k, k)) < EPSILON) // чтобы не произошло деления на 0
+      throw std::runtime_error("Zero pivot encountered");
+
+    for (std::size_t i = k + 1; i < rows(); ++i) {
+      double coeff = U[i][k] / U[k][k]; // коэффициент вычитания
+      L[i][k] = coeff;
+      for (std::size_t j = k; j < columns(); ++j)
+        U[i][j] -= coeff * U[k][j];
+    }
+  }
+
+  return std::make_pair(L, U);
 }
 
 } // namespace linalg

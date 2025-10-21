@@ -6,6 +6,7 @@
 
 #include <cstddef>
 #include <initializer_list>
+#include <iostream>
 #include <ostream>
 
 namespace linalg {
@@ -87,6 +88,8 @@ public:
   Matrix &gauss_backward();
 
   int swap_count() const;
+
+  std::pair<Matrix, Matrix> lu_decompose() const;
 };
 
 inline void swap(Matrix &left_matrix, Matrix &right_matrix) {
