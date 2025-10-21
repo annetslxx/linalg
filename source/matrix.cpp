@@ -1,6 +1,11 @@
-//
-// Created by Anna on 8.10.25.
-//
+/**
+* @file matrix.cpp
+ * @brief Заголовочный файл класса Matrix
+ * @author Anna Dolgopolova
+ * @email ardolgopolova@edu.hse.ru
+ * @date 29.09.2025
+ * @version 1.0
+ */
 
 #include <matrix.h>
 
