@@ -303,6 +303,34 @@ bool operator!=(const Matrix &left, const Matrix &right) {
   return !(left == right); // Переиспользуем ==
 }
 
+Matrix::Row::Row(double* row_ptr, std::size_t columns) noexcept
+  : m_row_ptr(row_ptr), m_columns(columns) {}
+
+//реализация оператора []
+double& Matrix::Row::operator[](std::size_t col) {
+  if (col >= m_columns) // индекс столбца не выходит за пределы матрицы
+    throw std::runtime_error("Column index out of range");
+  return m_row_ptr[col]; // все равно что *(m_row_ptr + col), те получаем уже сам элемент
+}
+
+const double& Matrix::Row::operator[](std::size_t col) const {
+  if (col >= m_columns)
+    throw std::runtime_error("Column index out of range");
+  return m_row_ptr[col];
+}
+
+Matrix::Row Matrix::operator[](std::size_t row) {
+  if (row >= m_rows) // индекс строки не выходит за пределы матрицы
+    throw std::runtime_error("Row index out of range");
+  return Row(m_ptr + row * m_columns, m_columns);
+}
+
+const Matrix::Row Matrix::operator[](std::size_t row) const {
+  if (row >= m_rows)
+    throw std::runtime_error("Row index out of range");
+  return Row(m_ptr + row * m_columns, m_columns);
+}
+
 double Matrix::norm() const {
   if (empty())
     throw std::runtime_error("Matrix is empty");

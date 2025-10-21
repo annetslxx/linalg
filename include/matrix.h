@@ -18,6 +18,16 @@ private:
   std::size_t m_capacity;
   double *m_ptr;
 
+  class Row {
+  private:
+    double* m_row_ptr;
+    std::size_t m_columns; // количество элементов в строке (то же самое, что кол-во столбцов), для проверки границ
+  public:
+    Row(double* row_ptr, std::size_t columns) noexcept;
+    double& operator[](std::size_t col);
+    const double& operator[](std::size_t col) const;
+  };
+
 public:
   inline static double EPSILON = 1e-9;
 
@@ -38,6 +48,9 @@ public:
 
   double &operator()(std::size_t row, std::size_t col);
   const double &operator()(std::size_t row, std::size_t col) const;
+
+  Row operator[](std::size_t row);
+  const Row operator[](std::size_t row) const;
 
   Matrix operator+() const;
   Matrix operator-() const;
